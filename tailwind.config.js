@@ -26,7 +26,7 @@ export default {
         "secondary":"#16B364",
         "tertiary":"#334054",
         "tertiary-light":"#98A2B3",
-        "highlight":"#D0D5DD",
+        "highlight":"#EEE",
         "background-1":"#D5E9FE",
         "background-2":"#C5ECD8",
         "error":"#DC1515"
