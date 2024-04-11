@@ -3,10 +3,13 @@ import { TextField, Button } from "@mui/material";
 import { db } from "../../../firebase/firebase";
 import { doc, setDoc, Timestamp } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword , updateProfile} from "firebase/auth";
+import { useLocation } from "react-router-dom"; // Import useLocation hook
 
 
 const MasterAccount = () => {
   const auth = getAuth();
+  const location = useLocation(); // Initialize useLocation hook
+  const queryParams = new URLSearchParams(location.search);
 
   const [formData, setFormData] = useState({
     username: null,
@@ -19,6 +22,7 @@ const MasterAccount = () => {
     name: null,
     mobileNumber: "",
     config: null,
+    hospitalName: queryParams.get("hospitalName"),
   });
 
   const [errors, setErrors] = useState({
@@ -138,7 +142,7 @@ const MasterAccount = () => {
     <div className="flex flex-col items-center gap-20 py-10">
       <h1 className="font-bold text-center text-4xl w-full">
         Set up master account for{" "}
-        <span className="text-primary">Apollo Hospital</span>
+        <span className="text-primary">{formData.hospitalName}</span>
       </h1>
 
       <section className="flex flex-col items-center border-solid border-2 border-highlight px-20 py-5 gap-5 w-6/12 rounded-xl">
