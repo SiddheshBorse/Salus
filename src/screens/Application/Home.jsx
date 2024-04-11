@@ -1,6 +1,6 @@
 import React from "react";
 
-import { emergencies, staff, doctor } from "../../constants";
+import { emergencies, staff, doctor, appointments, nextShift } from "../../constants";
 
 const Home = () => {
   return (
@@ -65,8 +65,41 @@ const Home = () => {
           </ul>
         </section>
       </section>
-      <section>Appointments</section>
-      <section>Next shift</section>
+      <section className="bg-white rounded-xl p-4 h-fit flex flex-col w-full">
+          <h4 className="font-semibold">Appointments</h4>
+          <ul>
+            {appointments.map((appointment, index) => (
+              <li
+                key={index}
+                className="flex justify-between py-2 border-b border-gray-300"
+              >
+                <span>{appointment.name}</span>
+                <span className="text-tertiary-light">
+                  {appointment.doctor}
+                </span>
+                <span className="text-tertiary-light">
+                  {appointment.ailment}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section className="bg-white rounded-xl p-4 h-fit flex flex-col w-full">
+          <h4 className="font-semibold">Next Shift</h4>
+          <ul>
+            {nextShift.map((staffMemeber, index) => (
+              <li
+                key={index}
+                className="flex justify-between py-2 border-b border-gray-300"
+              >
+                <span>{staffMemeber.name}</span>
+                <span className="text-tertiary-light">
+                  {staffMemeber.designation}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
     </div>
   );
 };
