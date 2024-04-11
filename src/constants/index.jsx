@@ -37,3 +37,7 @@ export const ipd_patient = [
   {name: "Benjamin Lee", doctor: "Dr. Wright", ward: "3", bed: "9"},
   {name: "Amelia Martinez", doctor: "Dr. King", ward: "1", bed: "15"}
 ];
+
+export const emergencies=[
+  {RoomNo: "1201", EmergencyType: "Heart Attack", instructions:"All the staff in the area to respond, get doctor patel"}
+]
