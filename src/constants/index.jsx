@@ -114,3 +114,181 @@ export const nextShift =[
   { name: "A Jadhav", designation: "Sister" },
   { name: "K Dasane", designation: "Cleaning staff" },
 ]
+
+export const wards = [
+  {
+    name: "Ward 1",
+    occupancy: "18",
+    totalCapacity: "18",
+    patients: [
+      {
+        name: "John Doe",
+        ailment: "Fever",
+        doctor: "Dr. Smith",
+        checkInDate: "2024-04-12",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Jane Smith",
+        ailment: "Broken Leg",
+        doctor: "Dr. Johnson",
+        checkInDate: "2024-04-10",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Alice Johnson",
+        ailment: "Headache",
+        doctor: "Dr. Lee",
+        checkInDate: "2024-04-11",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Bob Williams",
+        ailment: "Stomachache",
+        doctor: "Dr. Garcia",
+        checkInDate: "2024-04-11",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Emily Brown",
+        ailment: "Migraine",
+        doctor: "Dr. Anderson",
+        checkInDate: "2024-04-09",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Michael Jones",
+        ailment: "Flu",
+        doctor: "Dr. Martinez",
+        checkInDate: "2024-04-08",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Sarah Wilson",
+        ailment: "Sprained Ankle",
+        doctor: "Dr. Thompson",
+        checkInDate: "2024-04-07",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "David Brown",
+        ailment: "Sore Throat",
+        doctor: "Dr. Adams",
+        checkInDate: "2024-04-06",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Emma Johnson",
+        ailment: "Allergy",
+        doctor: "Dr. Harris",
+        checkInDate: "2024-04-05",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "James Smith",
+        ailment: "Injury",
+        doctor: "Dr. Carter",
+        checkInDate: "2024-04-04",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Olivia Garcia",
+        ailment: "Cough",
+        doctor: "Dr. Cooper",
+        checkInDate: "2024-04-03",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "William Wilson",
+        ailment: "Back Pain",
+        doctor: "Dr. Parker",
+        checkInDate: "2024-04-02",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Sophia Martinez",
+        ailment: "Rash",
+        doctor: "Dr. Evans",
+        checkInDate: "2024-04-01",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Liam Thompson",
+        ailment: "Earache",
+        doctor: "Dr. Rivera",
+        checkInDate: "2024-03-31",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Ava Adams",
+        ailment: "Eye Infection",
+        doctor: "Dr. Nelson",
+        checkInDate: "2024-03-30",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Noah Harris",
+        ailment: "Joint Pain",
+        doctor: "Dr. Mitchell",
+        checkInDate: "2024-03-29",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Isabella Carter",
+        ailment: "Anxiety",
+        doctor: "Dr. King",
+        checkInDate: "2024-03-28",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Mason Cooper",
+        ailment: "Nausea",
+        doctor: "Dr. Wright",
+        checkInDate: "2024-03-27",
+        lastVisited: "2024-04-12"
+      }
+    ]
+  },
+  {
+    name: "Ward 2",
+    occupancy: "5",
+    totalCapacity: "10",
+    patients: [
+      {
+        name: "Sophie Davis",
+        ailment: "Fever",
+        doctor: "Dr. Patel",
+        checkInDate: "2024-04-12",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Matthew Wilson",
+        ailment: "Broken Arm",
+        doctor: "Dr. Lopez",
+        checkInDate: "2024-04-10",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Ella Martinez",
+        ailment: "Sprained Wrist",
+        doctor: "Dr. Garcia",
+        checkInDate: "2024-04-09",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Lucas Brown",
+        ailment: "Cough",
+        doctor: "Dr. Lewis",
+        checkInDate: "2024-04-08",
+        lastVisited: "2024-04-12"
+      },
+      {
+        name: "Amelia Johnson",
+        ailment: "Headache",
+        doctor: "Dr. Turner",
+        checkInDate: "2024-04-07",
+        lastVisited: "2024-04-12"
+      }
+    ]
+  }
+];
