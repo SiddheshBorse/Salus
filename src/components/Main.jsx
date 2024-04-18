@@ -5,10 +5,11 @@ import StaffDisplay from '../screens/Application/StaffDisplay'
 import Reception from '../screens/Application/Reception'
 import Home from '../screens/Application/Home'
 import WardsAndBeds from '../screens/Application/WardsAndBeds'
+import WardDetails from '../screens/Application/WardDetails'
 
 const Main = () => {
   return (
-    <WardsAndBeds/>
+    <DoctorOnboarding/>
   )
 }
 

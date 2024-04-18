@@ -30,7 +30,12 @@ const Home = () => {
           ))}
         </section>
       </section>
-      <section>Manage hospital staff button</section>
+      <section className="w-full border-2 border-tertiary p-2 flex justify-between items-center rounded-xl  ">
+        <h4 className="font-semibold text-xl text-tertiary">Manage Hospital Staff</h4>
+        <button className="bg-tertiary p-3 rounded-lg text-white">
+          Manage
+        </button>
+      </section>
       <section className="flex w-full justify-between gap-4 items-start">
         <section className="bg-white rounded-xl p-4 h-fit flex flex-col w-6/12">
           <h4 className="font-semibold">Active Doctors</h4>

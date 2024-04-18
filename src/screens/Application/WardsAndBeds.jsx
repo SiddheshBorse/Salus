@@ -17,8 +17,6 @@ const WardsAndBeds = () => {
             {ward.occupancy !== "0" && ward.occupancy !== ward.totalCapacity && (
               <span>Available</span>
             )}
-            
-            {/* Render other content here */}
           </div>
           {ward.name}
         </section>
