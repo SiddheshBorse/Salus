@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { TextField, Button } from "@mui/material";
+import { TextField} from "@mui/material";
 import { db } from "../../../firebase/firebase";
-import { doc, setDoc, Timestamp } from "firebase/firestore";
+import { doc, setDoc} from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword , updateProfile} from "firebase/auth";
 import { useLocation } from "react-router-dom"; // Import useLocation hook
 
@@ -240,12 +240,12 @@ const MasterAccount = () => {
           helperText={showErrors ? errors.mobileNumber : ""}
         />
 
-        <Button
+        <button
           className="bg-primary text-white py-2 font-semibold rounded-lg w-full"
           variant="contained"
           onClick={handleSubmit}>
           Confirm
-        </Button>
+        </button>
 
         <a href="/" className="text-primary">
           Back

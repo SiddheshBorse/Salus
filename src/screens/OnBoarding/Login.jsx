@@ -115,13 +115,13 @@ const Login = () => {
               ),
             }}
           />
-          <Button
+          <button
             className="bg-primary text-white w-full py-2 font-bold rounded-lg"
             variant="contained"
             onClick={handleSubmit}
           >
             Login
-          </Button>
+          </button>
         </section>
         <a href="/" className="text-primary-dark font-bold">
           Create new system

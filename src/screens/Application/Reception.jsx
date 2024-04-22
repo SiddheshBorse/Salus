@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField, Button } from "@mui/material";
+import { TextField} from "@mui/material";
 import { opd_patient, ipd_patient } from "../../constants";
 //there needs to be a section that allows the receptionist to set what doctors that they are catering to
 const Reception = () => {

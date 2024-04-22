@@ -20,7 +20,6 @@ export default function App() {
         <Route path = "/doctor" element = {<DoctorUI/>}/>
         <Route path = "/onboarding" element = {<DoctorOnboarding/>}/>
         <Route path = "/staff" element = {<StaffDisplay/>}/>
-        
         </Routes>
       <Outlet/>
     </div>

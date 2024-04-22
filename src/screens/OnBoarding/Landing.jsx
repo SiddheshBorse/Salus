@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import landingDoctor from "../../assets/images/landingDoctor.svg";
-import { TextField, Button } from "@mui/material";
+import { TextField} from "@mui/material";
 import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 
 const Landing = () => {

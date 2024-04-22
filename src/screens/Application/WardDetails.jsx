@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField, Select, MenuItem, Button } from '@mui/material';
+import { TextField} from '@mui/material';
 import { staff } from "../../constants";
 
 const WardDetails = () => {

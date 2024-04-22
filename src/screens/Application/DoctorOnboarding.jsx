@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField, Select, MenuItem, Button } from '@mui/material';
+import { TextField, Select, MenuItem} from '@mui/material';
 
 const DoctorOnboarding = () => {
   return (
@@ -12,7 +12,7 @@ const DoctorOnboarding = () => {
           <button className="text-error font-medium bg-white w-fit px-5 py-2 rounded-xl">
             Delete
           </button>
-          <h3 className="font-medium text-3xl">Add Personnel to Staff</h3>
+          <h3 className="font-medium text-3xl">Add Personnel to Staff</h3>` `
           <button className="text-primary font-medium bg-white w-fit px-5 py-2 rounded-xl">
             Edit
           </button>
@@ -49,12 +49,12 @@ const DoctorOnboarding = () => {
             </Select>
             
           </section>
-          <Button
+          <button
             className="bg-primary text-white w-2/12 py-2 font-bold rounded-lg"
             variant="contained"
           >
             Create
-          </Button> 
+          </button> 
         </section>
         
       </section>
