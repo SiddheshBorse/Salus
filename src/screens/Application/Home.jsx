@@ -1,10 +1,71 @@
 import React from "react";
+import { auth , db} from "../../../firebase/firebase";
+import { doc,getDoc } from "firebase/firestore";
+import { useState,useEffect } from "react";
 
 import { emergencies, staff, doctor, appointments, nextShift } from "../../constants";
 
+const getCurrentUserMasterAccountName = async () => {
+
+  const currentUser = auth.currentUser;
+
+  if (currentUser) {
+      try {
+          // Get the UID of the current user
+          const uid = currentUser.uid;
+
+          // Reference to the document in the "Master Accounts" collection with the same UID as the current user
+          const masterAccountDocRef = doc(db, "Master Accounts", uid);
+
+          // Get the document snapshot
+          const docSnapshot = await getDoc(masterAccountDocRef);
+
+          // Check if the document exists
+          if (docSnapshot.exists()) {
+              // Get the data from the document
+              const userData = docSnapshot.data();
+
+              // Access the "name" field
+              const name = userData.name;
+
+              // Return the name
+              return name;
+          } else {
+              // Document does not exist
+              console.log("No document found for the current user");
+              return null;
+          }
+      } catch (error) {
+          console.error("Error fetching document:", error);
+          return null;
+      }
+  } else {
+      // No user is signed in
+      console.log("No user signed in");
+      return null;
+  }
+};
+
+// Usage example
+
+
 const Home = () => {
+
+  const [userName, setUserName] = useState(""); // State to store the current user's master account name
+
+  useEffect(() => {
+    getCurrentUserMasterAccountName().then(name => {
+      if (name !== null) {
+        setUserName(name); // Set the user's name in the state
+      }
+    });
+  }, []); // Run only once when the component mounts
+
+
+  
   return (
-    <div className="bg-highlight h-full flex flex-col flex-start p-2 gap-2 items-center overflow-y-auto">
+    <div className="bg-highlight h-full flex flex-col flex-start p-2 gap-2 overflow-y-auto">
+      <h1 className="font-bold text-2xl">👋 Hello, {userName} </h1>
       <section className="bg-background-2 w-full flex justify-between p-4 rounded-xl">
         <h4 className="text-secondary font-semibold">No Emergency Code</h4>
         <button className="text-error font-semibold">Call Emergency</button>

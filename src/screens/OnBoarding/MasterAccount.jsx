@@ -144,7 +144,7 @@ const MasterAccount = () => {
                 hospitalUID: hospitalDocRef.id // Use the automatically generated UID
             });
 
-            navigate("/dashboard");
+            navigate("/dashboard/home");
             setIsLoading(false);
             setShowErrors(false);
         } catch (error) {

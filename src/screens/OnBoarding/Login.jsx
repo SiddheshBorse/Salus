@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import LoginBanner from '../../assets/images/LoginBanner.png';
-import { TextField, IconButton, InputAdornment, Button, Alert } from '@mui/material';
+import { TextField, IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-
-
+import { useNavigate } from "react-router-dom";
+import { Snackbar, Alert } from '@mui/material';
 
 const Login = () => {
-  const auth = getAuth(); 
+  const auth = getAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
@@ -15,6 +15,10 @@ const Login = () => {
     loginId: '',
     password: '',
   });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Add isLoading state
+  const navigate = useNavigate();
 
   const handleClickShowPassword = () => {
     setShowPassword((prevState) => !prevState);
@@ -60,20 +64,26 @@ const Login = () => {
     e.preventDefault();
 
     if (validateForm()) {
-      console.log('Login ID:', loginId);
-      console.log('Password:', password);
-    }
-    signInWithEmailAndPassword(auth, loginId, password)
-  .then((userCredential) => {
-    const user = userCredential.user;
-    console.log("login successful for " +JSON.stringify(user.metadata));
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    console.log(errorMessage);
-  });
+      setIsLoading(true); // Set isLoading to true before making the API call
 
+      signInWithEmailAndPassword(auth, loginId, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          console.log("login successful for " + JSON.stringify(user.metadata));
+          navigate("/dashboard/home");
+          setIsLoading(false); // Set isLoading back to false after successful login
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log(errorMessage);
+
+          // Set the error message and open the snackbar
+          setErrorMessage(errorMessage);
+          setSnackbarOpen(true);
+          setIsLoading(false); // Set isLoading back to false if there's an error
+        });
+    }
   };
 
   return (
@@ -119,14 +129,24 @@ const Login = () => {
             className="bg-primary text-white w-full py-2 font-bold rounded-lg"
             variant="contained"
             onClick={handleSubmit}
+            disabled={isLoading} // Disable the button when loading
           >
-            Login
+            {isLoading ? 'Loading...' : 'Login'} {/* Change button text to "Loading..." when loading */}
           </button>
         </section>
         <a href="/landing" className="text-primary-dark font-bold">
           Create new system
         </a>
       </section>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity="error" sx={{ width: '100%' }}>
+          {errorMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
