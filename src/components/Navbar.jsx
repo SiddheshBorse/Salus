@@ -62,9 +62,11 @@ const Navbar = () => {
           <li className={`${tabClass('Emergency')} ${inactiveTabClass}`} onClick={() => handleTabClick('Emergency')}>
             Emergency
           </li>
+          <li className={`${tabClass('Onboarding')} ${inactiveTabClass}`} onClick={() => handleTabClick('Onboarding')}>
+            Staff Onboarding
+          </li>
         </ul>
       </div>
-      <div>account settings</div>
     </div>
   );
 };

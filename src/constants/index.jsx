@@ -292,3 +292,46 @@ export const wards = [
     ]
   }
 ];
+
+export const codes = [
+  {
+    code: "Blue",
+    description: "Medical emergency, typically indicating a patient requires immediate resuscitation or assistance due to cardiac or respiratory arrest."
+  },
+  {
+    code: "Red",
+    description: "Fire emergency, indicating a fire or smoke hazard within the hospital premises. It initiates evacuation procedures and alerts staff to extinguish or contain the fire."
+  },
+  {
+    code: "Pink",
+    description: "Pediatric emergency, often used to indicate a child abduction or any other situation involving a child requiring immediate attention."
+  },
+  {
+    code: "Yellow",
+    description: "Bomb threat or hazardous material spill, signaling the presence of a potential threat to safety within the hospital."
+  },
+  {
+    code: "Black",
+    description: "Severe weather alert, such as a tornado warning, prompting staff to take shelter and implement safety protocols to protect patients and personnel."
+  },
+  {
+    code: "Silver",
+    description: "Active shooter or violent person on the premises, indicating a threat to the safety and security of staff, patients, and visitors."
+  },
+  {
+    code: "Orange",
+    description: "Hazardous spill or contamination, typically involving chemicals or biological materials, requiring immediate containment and cleanup."
+  },
+  {
+    code: "Green",
+    description: "Mass casualty incident or multiple trauma victims, signaling the need for additional resources and personnel to manage a large number of patients simultaneously."
+  },
+  {
+    code: "Purple",
+    description: "Hostage situation or violent individual, indicating a threat to staff or patients requiring law enforcement intervention and specialized response protocols."
+  },
+  {
+    code: "Brown",
+    description: "Severe weather or natural disaster, such as a flood or earthquake, prompting emergency response measures to ensure the safety and well-being of everyone in the hospital."
+  }
+];

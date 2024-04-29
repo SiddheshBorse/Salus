@@ -9,7 +9,7 @@ import WardDetails from '../screens/Application/WardDetails'
 
 const Main = () => {
   return (
-    <DoctorOnboarding/>
+    <Home/>
   )
 }
 

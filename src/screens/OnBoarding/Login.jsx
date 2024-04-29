@@ -123,7 +123,7 @@ const Login = () => {
             Login
           </button>
         </section>
-        <a href="/" className="text-primary-dark font-bold">
+        <a href="/landing" className="text-primary-dark font-bold">
           Create new system
         </a>
       </section>

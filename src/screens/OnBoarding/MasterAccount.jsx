@@ -1,15 +1,26 @@
 import React, { useState } from "react";
-import { TextField} from "@mui/material";
+import { TextField } from "@mui/material";
 import { db } from "../../../firebase/firebase";
-import { doc, setDoc} from "firebase/firestore";
-import { getAuth, createUserWithEmailAndPassword , updateProfile} from "firebase/auth";
-import { useLocation } from "react-router-dom"; // Import useLocation hook
-
+import { doc, setDoc,addDoc,collection } from "firebase/firestore";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Snackbar, Alert } from "@mui/material";
 
 const MasterAccount = () => {
   const auth = getAuth();
-  const location = useLocation(); // Initialize useLocation hook
+  const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
+  const navigate = useNavigate();
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [formData, setFormData] = useState({
     username: null,
@@ -42,6 +53,7 @@ const MasterAccount = () => {
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     validateField(e.target.name, e.target.value);
+    setShowErrors(false);
   };
 
   const validateField = (field, value) => {
@@ -96,47 +108,67 @@ const MasterAccount = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setShowErrors(true);
   
-    // Validate all fields
+    setShowErrors(true);
+    setIsLoading(true);
+  
     for (const field in formData) {
-      validateField(field, formData[field]);
+        validateField(field, formData[field]);
     }
   
-    // Check if there are any errors
     const hasErrors = Object.values(errors).some((error) => error !== "");
   
     if (!hasErrors) {
-      try {
-        await setDoc(doc(db, "Master Accounts", formData.email), formData);
-        await setDoc(doc(db, "Credentials", formData.email), {
-          email: formData.email,
-          password: formData.password,
-        });
-      } catch (error) {
-        console.log(error);
-      }
-  
-      createUserWithEmailAndPassword(auth, formData.email, formData.password)
-        .then(async (userCredential) => {
-          const user = userCredential.user;
-          await updateProfile(user, {
-            displayName: "John Doe",
-            customData: {
-              role: "admin",
-              organization: "Apollo Hospital",
-            },
-          });
-        })
-        .catch((error) => {
+        try {
+            // Create a new user with email and password
+            const userCredential = await createUserWithEmailAndPassword(
+                auth,
+                formData.email,
+                formData.password
+            );
+            const user = userCredential.user;
+
+            // Create a new hospital document with an automatically generated UID
+            const hospitalDocRef = doc(collection(db, "Hospitals")); // No UID provided
+
+            // Set data for the hospital document
+            await setDoc(hospitalDocRef, {
+                name: formData.hospitalName,
+                masterAccountUID: user.uid
+            });
+
+            // Update the master account document with hospital UID
+            await setDoc(doc(db, "Master Accounts", user.uid), {
+                ...formData,
+                uid: user.uid,
+                hospitalUID: hospitalDocRef.id // Use the automatically generated UID
+            });
+
+            navigate("/dashboard");
+            setIsLoading(false);
+            setShowErrors(false);
+        } catch (error) {
+          console.error("Error:", error);
+          setIsLoading(false);
+      
+          // Handle sign-up errors
           const errorCode = error.code;
           const errorMessage = error.message;
-        });
+          console.error(error);
+      
+          // Set the error message and open the snackbar
+          setErrorMessage(errorMessage);
+          setSnackbarOpen(true);
+      
+          // Navigate to the landing page
+          // navigate("/landing");
+        }
     } else {
-      // Display error message
-      console.log("Form has errors:", errors);
+        console.log("Form has errors:", errors);
+        setIsLoading(false);
     }
-  };
+};
+
 
   return (
     <div className="flex flex-col items-center gap-20 py-10">
@@ -243,14 +275,24 @@ const MasterAccount = () => {
         <button
           className="bg-primary text-white py-2 font-semibold rounded-lg w-full"
           variant="contained"
-          onClick={handleSubmit}>
-          Confirm
+          onClick={handleSubmit}
+          disabled={isLoading}>
+          {isLoading ? "Loading..." : "Confirm"}
         </button>
 
-        <a href="/" className="text-primary">
+        <a href="/landing" className="text-primary font-semibold">
           Back
         </a>
       </section>
+      <Snackbar
+            open={snackbarOpen}
+            autoHideDuration={6000}
+            onClose={() => setSnackbarOpen(false)}
+        >
+            <Alert onClose={() => setSnackbarOpen(false)} severity="error" sx={{ width: '100%' }}>
+                {errorMessage}
+            </Alert>
+        </Snackbar>
     </div>
   );
 };
