@@ -4,7 +4,7 @@ import { staff, doctor } from "../../constants";
 
 const StaffDisplay = () => {
   return (
-    <div className="bg-highlight flex flex-col flex-start p-2 gap-2">
+    <div className="bg-highlight flex flex-col flex-start p-2 gap-2 h-full">
       <section className="flex items-center gap-2 justify-center">
         <TextField className="w-4/12" label="Search staff member" />
         <button

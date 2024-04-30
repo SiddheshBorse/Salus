@@ -46,8 +46,6 @@ const getCurrentUserMasterAccountName = async () => {
   }
 };
 
-// Usage example
-
 
 const Home = () => {
 

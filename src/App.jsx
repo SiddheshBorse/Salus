@@ -1,6 +1,4 @@
 import Landing from "./screens/OnBoarding/Landing";
-import landingDoctor from "./assets/images/landingDoctor.svg";
-import { TextField } from "@mui/material";
 import MasterAccount from "./screens/OnBoarding/MasterAccount";
 import Login from "./screens/OnBoarding/Login";
 import Dashboard from "./screens/Application/Dashboard";
@@ -12,6 +10,7 @@ import Home from "./screens/Application/Home";
 import Reception from "./screens/Application/Reception";
 import WardsAndBeds from "./screens/Application/WardsAndBeds";
 import WardDetails from "./screens/Application/WardDetails";
+import Settings from "./screens/Application/Settings";
 
 export default function App() {
   return (
@@ -25,6 +24,7 @@ export default function App() {
           <Route path="reception" element={<Reception />} />
           <Route path="wardsDisplay" element={<WardsAndBeds />} />
           <Route path="wardsDetails" element={<WardDetails />} />
+          <Route path="settings" element={<Settings/>} />
         </Route>
         <Route path="/landing" element={<Landing />} />
         <Route path="/login" element={<Login />} />
