@@ -15,11 +15,12 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
+  width: 500, // Increase the width
+  maxWidth: "90%", // Set maximum width to prevent it from being too wide on large screens
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
-  p: 4,
+  p: 4, // Add padding
 };
 
 const DoctorUI = () => {
@@ -33,12 +34,12 @@ const DoctorUI = () => {
   const [ending, setEnding] = useState("10:00");    
 
   const createCard = () => {
-    // Convert starting and ending time strings to Date objects for comparison
+    // Convert starting and ending time strings to Date objects
     const startingTime = new Date(`2022-01-01T${starting}`);
     const endingTime = new Date(`2022-01-01T${ending}`);
   
     // Check for overlapping time range
-    const isOverlapping = data.some(card => {
+    const isOverlapping = data.some((card) => {
       const cardStartingTime = new Date(`2022-01-01T${card.startingTime}`);
       const cardEndingTime = new Date(`2022-01-01T${card.endingTime}`);
       return (
@@ -53,49 +54,61 @@ const DoctorUI = () => {
       const newCard = {
         date: startDate,
         startingTime: starting,
-        endingTime: ending
+        endingTime: ending,
       };
-      setData(prevData => [...prevData, newCard]);
+      setData((prevData) => [...prevData, newCard]);
+      handleClose(); // Close the modal
+    } else {
+      alert("Time range overlaps with existing appointments. Please select a different time range.");
     }
-  
-    // Close the modal
-    handleClose();
   };
-
+  const isEmpty = data.length === 0;
   return (
     <div>
-      <Button onClick={handleOpen}>Open modal</Button>
+      <div style={{ display: "flex", alignItems: "center", padding: '10px'}}>
+        {isEmpty ? (
+          <Typography>No appointments found. Click the button above to add the first appointment.</Typography>
+        ) : (
+          <Typography>You have appointments scheduled. Add a new appointment.</Typography>
+        )}
+        <Button onClick={handleOpen} style={{ marginLeft: "10px" }}>
+          Open modal
+        </Button>
+      </div>
       <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <div>
-            Select date:
-            <DatePicker
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-            />
-            Starting from:{" "}
-            <TimePicker
-              onChange={setStarting}
-              value={starting}
-            />
-            Ending at:{" "}
-            <TimePicker
-              onChange={setEnding}
-              value={ending}
-            />
-            <button onClick={createCard}>Submit</button>
-          </div>
-        </Box>
-      </Modal>
+  open={open}
+  onClose={handleClose}
+  aria-labelledby="modal-modal-title"
+  aria-describedby="modal-modal-description"
+>
+  <Box sx={style}>
+    <div>
+      <Typography>Select date:</Typography>
+      <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} />
+    </div>
+    <div style={{ marginTop: "10px" }}>
+      <Typography>Starting from:</Typography>
+      <TimePicker onChange={setStarting} value={starting} />
+    </div>
+    <div style={{ marginTop: "10px" }}>
+      <Typography>Ending at:</Typography>
+      <TimePicker onChange={setEnding} value={ending} />
+    </div>
+    <div style={{ marginTop: "20px", textAlign: "right" }}>
+      <Button onClick={createCard} variant="contained" color="primary" style={{ marginRight: "10px" }}>
+        Submit
+      </Button>
+      <Button onClick={handleClose} variant="outlined" color="primary">
+        Cancel
+      </Button>
+    </div>
+  </Box>
+</Modal>
+
   
       <div>
         {data.map((card, index) => (
-          <div key={index} style={{ marginBottom: '10px', border: '1px solid #ccc', padding: '10px' }}>
+          <div key={index} style={{ marginBottom: '10px', border: '1px solid #ccc', padding: '10px', margin: '10px' }}>
             <Typography>Date: {card.date.toString()}</Typography>
             <Typography>Starting Time: {card.startingTime}</Typography>
             <Typography>Ending Time: {card.endingTime}</Typography>
@@ -106,4 +119,4 @@ const DoctorUI = () => {
   );
 };
 
-export default DoctorUI;
+export default DoctorUI;

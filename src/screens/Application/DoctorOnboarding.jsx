@@ -1,56 +1,55 @@
 import React, { useState } from "react";
-import { TextField, Select, MenuItem, InputLabel, Button } from '@mui/material';
+import { TextField, Select, MenuItem, InputLabel, Button , FormControlLabel, Switch} from '@mui/material';
 import { auth, db} from "../../../firebase/firebase";
 import { doc,getDoc, collection ,addDoc} from "firebase/firestore";
+import QRCode from 'qrcode.react';
 
 const DoctorOnboarding = () => {
 
   const getCurrentUserHospitalUID = async () => {
+    const currentUser = auth.currentUser;
 
-  const currentUser = auth.currentUser;
-
-  if (currentUser) {
+    if (currentUser) {
       try {
-          const uid = currentUser.uid;
+        const uid = currentUser.uid;
+        const masterAccountDocRef = doc(db, "Master Accounts", uid);
+        const docSnapshot = await getDoc(masterAccountDocRef);
 
-          const masterAccountDocRef = doc(db, "Master Accounts", uid);
-
-          const docSnapshot = await getDoc(masterAccountDocRef);
-
-          if (docSnapshot.exists()) {
-
-              const userData = docSnapshot.data();
-
-              const hospitalUID = userData.hospitalUID;
-
-              return hospitalUID;
-          } else {
-              console.log("No document found for the current user");
-              return null;
-          }
+        if (docSnapshot.exists()) {
+          const userData = docSnapshot.data();
+          const hospitalUID = userData.hospitalUID;
+          return hospitalUID;
+        } else {
+          console.log("No document found for the current user");
+          return null;
+        }
       } catch (error) {
           console.error("Error fetching document:", error);
           return null;
       }
-  } else {
+    } else {
       console.log("No user signed in");
       return null;
-  }
-};
+    }
+  };
 
-const pushPersonellToHospital = async (hospitalUID, personnelData) => {
-  try {
-    const personnelCollectionRef = collection(db, "Hospitals", hospitalUID, "personnel");
+  const pushPersonellToHospital = async (hospitalUID, personnelData) => {
+    try {
+      const personnelCollectionRef = collection(db, "Hospitals", hospitalUID, "personnel");
+      const docRef = await addDoc(personnelCollectionRef, personnelData);
+      const documentId = docRef.id;
+      console.log("Personnel added to hospital collection successfully.");
+      return documentId; // Return the document ID
+    } catch (error) {
+      console.error("Error adding personnel to hospital collection:", error);
+      throw error; // Throw error for handling in handleCreate
+    }
+  };
 
-    await addDoc(personnelCollectionRef, personnelData);
+  const [personnelDocID, setPersonnelDocID] = useState(null);
 
-    console.log("Personnel added to hospital subcollection successfully.");
-  } catch (error) {
+  const [qrCodeData, setQrCodeData] = useState(null);
 
-    console.error("Error adding personnel to hospital subcollection:", error);
-    
-  }
-};
 
   const [formData, setFormData] = useState({
     name: "",
@@ -59,7 +58,8 @@ const pushPersonellToHospital = async (hospitalUID, personnelData) => {
     phone: "",
     department: "",
     specialty: "",
-    designation: ""
+    designation: "",
+    isICU: false // Added ICU status
   });
 
   const handleInputChange = (event) => {
@@ -86,22 +86,32 @@ const pushPersonellToHospital = async (hospitalUID, personnelData) => {
     }));
   };
 
+  const handleICUToggle = () => {
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      isICU: !prevFormData.isICU
+    }));
+  };
+
   const handleCreate = async () => {
     try {
+      // Wait for the hospital UID
       const hospitalUID = await getCurrentUserHospitalUID();
       console.log("Hospital UID:", hospitalUID);
       console.log("Form Data:", formData);
   
       // Call the function to add personnel to the hospital subcollection
-      await pushPersonellToHospital(hospitalUID, formData);
+      const personnelDocID = await pushPersonellToHospital(hospitalUID, formData);
+  
+      // Generate QR code data
+      const qrData = JSON.stringify({ key:"bbldrizzy",hospitalUID: hospitalUID , uid: personnelDocID });
+      setQrCodeData(qrData);
     } catch (error) {
       console.error("Error:", error);
       // Handle error
     }
   };
   
-  
-
   return (
     <div className="bg-highlight h-full flex flex-col flex-start p-2 gap-2 overflow-scroll">
       <Button className="text-primary font-medium bg-white w-fit px-5 py-2 rounded-xl">
@@ -175,6 +185,15 @@ const pushPersonellToHospital = async (hospitalUID, personnelData) => {
             <h4 className="w-2/12">Designation</h4>
             <TextField name="designation" label="Designation" className="w-full" value={formData.designation} onChange={handleInputChange} />
           </section>
+          <FormControlLabel
+        control={<Switch checked={formData.isICU} onChange={handleICUToggle} />}
+        label="Working in ICU"
+      />
+      {qrCodeData && (
+      <div className="flex justify-center">
+        <QRCode value={qrCodeData} />
+      </div>
+    )}
           <Button
             className="bg-primary text-white w-2/12 py-2 font-bold rounded-lg"
             variant="contained"
