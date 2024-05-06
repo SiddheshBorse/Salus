@@ -1,8 +1,11 @@
 import React from "react";
 import { TextField} from "@mui/material";
 import { staff, doctor } from "../../constants";
+import { useNavigate } from "react-router-dom";
 
 const StaffDisplay = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-highlight flex flex-col flex-start p-2 gap-2 h-full">
       <section className="flex items-center gap-2 justify-center">
@@ -14,7 +17,8 @@ const StaffDisplay = () => {
         </button>
         <button
           className="bg-tertiary text-white w-2/12 py-2 font-bold rounded-lg"
-          variant="contained">
+          variant="contained"
+          onClick={()=>{navigate("/dashboard/doctorOnboarding")}}>
           Add new member
         </button>
       </section>
