@@ -11,6 +11,8 @@ import Reception from "./screens/Application/Reception";
 import WardsAndBeds from "./screens/Application/WardsAndBeds";
 import WardDetails from "./screens/Application/WardDetails";
 import Settings from "./screens/Application/Settings";
+import Patients from "./screens/Application/Patients";
+import PatientRegistration from "./screens/Application/PatientRegistration";
 
 export default function App() {
   return (
@@ -25,6 +27,8 @@ export default function App() {
           <Route path="wardsDisplay" element={<WardsAndBeds />} />
           <Route path="wardsDetails" element={<WardDetails />} />
           <Route path="settings" element={<Settings/>} />
+          <Route path="patients" element={<Patients />} />
+            <Route path="patient-registration" element={<PatientRegistration />} />
         </Route>
         <Route path="/landing" element={<Landing />} />
         <Route path="/login" element={<Login />} />
