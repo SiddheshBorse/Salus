@@ -28,7 +28,7 @@ export default function App() {
           <Route path="wardsDetails" element={<WardDetails />} />
           <Route path="settings" element={<Settings/>} />
           <Route path="patients" element={<Patients />} />
-            <Route path="patient-registration" element={<PatientRegistration />} />
+            <Route path="patientRegistration" element={<PatientRegistration />} />
         </Route>
         <Route path="/landing" element={<Landing />} />
         <Route path="/login" element={<Login />} />

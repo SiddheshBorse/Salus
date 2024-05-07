@@ -1,68 +1,114 @@
-import React from "react";
-import { TextField} from "@mui/material";
-import { opd_patient, ipd_patient } from "../../constants";
+import React, { useState, useEffect } from "react";
+import { TextField, Button } from "@mui/material";
 import { Link } from "react-router-dom";
+import { collection, getDocs, doc } from "firebase/firestore";
+import { db, auth } from "../../../firebase/firebase";
 
 const Patients = () => {
-    return (
-        <div className="bg-highlight h-full flex flex-col flex-start p-2 gap-2 items-center">
-        <section className="flex items-center justify-between w-full">
-  <TextField className="w-4/12" label="Search Patient" />
-  <div className="flex items-center"> {/* Wrap buttons in a div and apply flexbox */}
-    <button className="bg-primary text-white py-2 px-4 font-bold rounded-lg mr-2" variant="contained"> {/* Added padding */}
-      Search
-    </button>
-    <Link to="/dashboard/patientRegistration">
-      <button className="bg-gray-700 text-white py-2 px-8 font-bold rounded-lg" variant="contained"> {/* Adjusted padding and width */}
-        Add New Patient
-      </button>
-    </Link>
-  </div>
-</section>
+  const [patients, setPatients] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
 
-        <div className="reception-scroll-container overflow-y-auto h-full w-full">
-          <section className="bg-background-2 rounded-xl p-4 flex flex-col justify-center items-center gap-4 w-full">
-            <h4 className="font-semibold text-2xl">OPD Patients</h4>
-            {opd_patient.slice(0, 5).map((patient, index) => (
-              <section key={index} className="bg-white rounded-xl p-4 flex flex-col w-full gap-4">
-                <section className="flex justify-between w-full items-center">
-                  <h4 className="font-semibold text-xl">{patient.name}</h4>
-                  <button className="bg-tertiary text-white w-1/12 py-2 font-bold rounded-lg" variant="contained">
-                    View
-                  </button>
-                </section>
-                <section className="flex justify-between w-full items-center">
-                  <h4>Status</h4>
-                  <h4>{patient.status}</h4>
-                </section>
-                <section className="flex justify-between w-full items-center">
-                  <h4>{patient.doctor}</h4>
-                  <h4>{patient.ailment}</h4>
-                </section>
-              </section>
-            ))}
-          </section>
-          <section className="w-full gap-4 flex flex-col items-center">
-            <h4 className="font-semibold text-2xl">IPD Patients</h4>
-            {ipd_patient.slice(0, 5).map((patient, index) => (
-              <section key={index} className="bg-white rounded-xl p-4 flex flex-col w-full gap-4">
-                <section className="flex justify-between w-full items-center">
-                  <h4 className="font-semibold text-xl">{patient.name}</h4>
-                  <button className="bg-tertiary text-white w-1/12 py-2 font-bold rounded-lg" variant="contained">
-                    View
-                  </button>
-                </section>
-                <section className="flex justify-between w-full items-center">
-                  <h4>Bed No.: {patient.bed}</h4>
-                  <h4>Assigned Doctor: {patient.doctor}</h4>
-                  <h4>Ward no: {patient.ward}</h4>
-                </section>
-              </section>
-            ))}
-          </section>
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  const fetchPatients = async () => {
+    setLoading(true);
+    try {
+      const hospitalUID = await getCurrentUserHospitalUID();
+      if (hospitalUID) {
+        const patientsCollectionRef = collection(db, "Hospitals", hospitalUID, "patients");
+        const querySnapshot = await getDocs(patientsCollectionRef);
+        const patientData = [];
+        querySnapshot.forEach((doc) => {
+          patientData.push({ id: doc.id, ...doc.data() });
+        });
+        setPatients(patientData);
+      } else {
+        console.log("No hospital UID found for the current user");
+      }
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCurrentUserHospitalUID = async () => {
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      try {
+        const uid = currentUser.uid;
+        const masterAccountDocRef = doc(db, "Master Accounts", uid);
+        const docSnapshot = await getDoc(masterAccountDocRef);
+        if (docSnapshot.exists()) {
+          const userData = docSnapshot.data();
+          return userData.hospitalUID;
+        } else {
+          console.log("No document found for the current user");
+          return null;
+        }
+      } catch (error) {
+        console.error("Error fetching document:", error);
+        return null;
+      }
+    } else {
+      console.log("No user signed in");
+      return null;
+    }
+  };
+
+  const handleSearch = () => {
+    // Perform search logic here
+  };
+
+  return (
+    <div className="bg-highlight h-full flex flex-col flex-start p-2 gap-2 items-center">
+      <section className="flex items-center justify-between w-full">
+        <TextField
+          className="w-4/12"
+          label="Search Patient"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <div className="flex items-center">
+          <Button
+            className="bg-primary text-white py-2 px-4 font-bold rounded-lg mr-2"
+            variant="contained"
+            onClick={handleSearch}
+          >
+            Search
+          </Button>
+          <Link to="/dashboard/patientRegistration">
+            <Button
+              className="bg-gray-700 text-white py-2 px-8 font-bold rounded-lg"
+              variant="contained"
+            >
+              Add New Patient
+            </Button>
+          </Link>
         </div>
+      </section>
+      <div className="reception-scroll-container overflow-y-auto h-full w-full">
+        {/* Render patient list here */}
+        {loading ? (
+          <p>Loading...</p>
+        ) : patients.length === 0 ? (
+          <p>No patients found</p>
+        ) : (
+          patients.map((patient) => (
+            <div key={patient.id}>
+              {/* Render patient details */}
+              <p>{patient.name}</p>
+              <p>{patient.email}</p>
+              {/* Add more patient details as needed */}
+            </div>
+          ))
+        )}
       </div>
-    )
+    </div>
+  );
 };
 
 export default Patients;
