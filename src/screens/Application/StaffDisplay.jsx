@@ -23,26 +23,41 @@ const StaffDisplay = () => {
 
   const getCurrentUserHospitalUID = async () => {
     const currentUser = auth.currentUser;
-
+  
     if (currentUser) {
       try {
-        const uid = currentUser.uid;
-        const masterAccountDocRef = doc(db, "Master Accounts", uid);
-        const docSnapshot = await getDoc(masterAccountDocRef);
-
-        if (docSnapshot.exists()) {
-          const userData = docSnapshot.data();
-          const hospitalUID = userData.hospitalUID;
-          return hospitalUID;
-        } else {
-          console.log("No document found for the current user");
-          return null;
+        // Get the UID of the current user
+        const userUID = currentUser.uid;
+  
+        // Reference to the "personnelMap" document
+        const personnelMapDocRef = doc(db, "personnelMap", "personnelMap");
+  
+        // Get the document snapshot
+        const personnelMapDocSnapshot = await getDoc(personnelMapDocRef);
+  
+        // Check if the document exists
+        if (personnelMapDocSnapshot.exists()) {
+          // Get the data from the document
+          const personnelMapData = personnelMapDocSnapshot.data();
+  
+          // Check if the user's UID exists in the personnelMap
+          if (personnelMapData && personnelMapData[userUID]) {
+            const hospitalUID = personnelMapData[userUID];
+  
+            // Return the hospital UID
+            return hospitalUID;
+          }
         }
+  
+        // Document or user's UID not found
+        console.log("No document or user's UID found");
+        return null;
       } catch (error) {
-          console.error("Error fetching document:", error);
-          return null;
+        console.error("Error fetching document:", error);
+        return null;
       }
     } else {
+      // No user is signed in
       console.log("No user signed in");
       return null;
     }

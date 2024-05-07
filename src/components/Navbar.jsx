@@ -6,57 +6,61 @@ import { useState,useEffect } from "react";
 import { NavLink } from "react-router-dom";
 
 const getCurrentUserHospitalName = async () => {
-
   const currentUser = auth.currentUser;
 
   if (currentUser) {
-      try {
-          // Get the UID of the current user
-          const uid = currentUser.uid;
+    try {
+      // Get the UID of the current user
+      const userUID = currentUser.uid;
 
-          // Reference to the document in the "Master Accounts" collection with the same UID as the current user
-          const masterAccountDocRef = doc(db, "Master Accounts", uid);
+      // Reference to the "personnelMap" document
+      const personnelMapDocRef = doc(db, "personnelMap", "personnelMap");
+
+      // Get the document snapshot
+      const personnelMapDocSnapshot = await getDoc(personnelMapDocRef);
+
+      // Check if the document exists
+      if (personnelMapDocSnapshot.exists()) {
+        // Get the data from the document
+        const personnelMapData = personnelMapDocSnapshot.data();
+
+        // Check if the user's UID exists in the personnelMap
+        if (personnelMapData && personnelMapData[userUID]) {
+          const hospitalUID = personnelMapData[userUID];
+
+          // Reference to the document in the "Hospitals" collection with the retrieved hospitalUID
+          const hospitalDocRef = doc(db, "Hospitals", hospitalUID);
 
           // Get the document snapshot
-          const docSnapshot = await getDoc(masterAccountDocRef);
+          const hospitalDocSnapshot = await getDoc(hospitalDocRef);
 
-          // Check if the document exists
-          if (docSnapshot.exists()) {
-              // Get the data from the document
-              const userData = docSnapshot.data();
+          // Check if the hospital document exists
+          if (hospitalDocSnapshot.exists()) {
+            // Get the data from the hospital document
+            const hospitalData = hospitalDocSnapshot.data();
 
-              // Access the "name" field
-              const hospitalUID = userData.hospitalUID;
+            // Access the "name" field
+            const hospitalName = hospitalData.name;
 
-              const hospitalDocRef = doc(db,"Hospitals", hospitalUID);
-
-              const hospitalDocSnapshot = await getDoc(hospitalDocRef);
-
-              if(hospitalDocSnapshot.exists()){
-                const hospitalData = hospitalDocSnapshot.data();
-
-                const hospitalName = hospitalData.name;
-                return hospitalName
-              }
-
-              // Return the name
-              return null;
-          } else {
-              // Document does not exist
-              console.log("No document found for the current user");
-              return null;
+            // Return the hospital name
+            return hospitalName;
           }
-      } catch (error) {
-          console.error("Error fetching document:", error);
-          return null;
+        }
       }
-  } else {
-      // No user is signed in
-      console.log("No user signed in");
+
+      // Document or user's UID not found
+      console.log("No document or user's UID found");
       return null;
+    } catch (error) {
+      console.error("Error fetching document:", error);
+      return null;
+    }
+  } else {
+    // No user is signed in
+    console.log("No user signed in");
+    return null;
   }
 };
-
 const Navbar = () => {
   const [activeTab, setActiveTab] = useState('Home');
 

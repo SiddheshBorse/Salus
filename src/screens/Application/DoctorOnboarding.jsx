@@ -1,51 +1,96 @@
 import React, { useState } from "react";
 import { TextField, Select, MenuItem, InputLabel, Button , FormControlLabel, Switch} from '@mui/material';
-import { auth, db, storage} from "../../../firebase/firebase";
-import { doc,getDoc, collection ,addDoc} from "firebase/firestore";
+import { auth, db} from "../../../firebase/firebase";
+import { doc,getDoc, collection ,addDoc, setDoc} from "firebase/firestore";
 import QRCode from 'qrcode.react';
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const DoctorOnboarding = () => {
+  const createFirebaseUser = async (email, password) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      return user.uid;
+    } catch (error) {
+      console.error("Error creating Firebase user:", error);
+      throw error;
+    }
+  };
+
+  const addToPersonnelMap = async (personnelDocID, hospitalUID) => {
+    try {
+      const personnelMapDocRef = doc(db, "personnelMap", "personnelMap");
+      const personnelMapData = await getDoc(personnelMapDocRef);
+      let personnelMap = {};
+  
+      if (personnelMapData.exists()) {
+        personnelMap = personnelMapData.data();
+      }
+  
+      personnelMap[personnelDocID] = hospitalUID;
+  
+      await setDoc(personnelMapDocRef, personnelMap);
+      console.log("Personnel map updated successfully.");
+    } catch (error) {
+      console.error("Error updating personnel map:", error);
+      throw error;
+    }
+  };
 
   const getCurrentUserHospitalUID = async () => {
     const currentUser = auth.currentUser;
-
+  
     if (currentUser) {
       try {
-        const uid = currentUser.uid;
-        const masterAccountDocRef = doc(db, "Master Accounts", uid);
-        const docSnapshot = await getDoc(masterAccountDocRef);
-
-        if (docSnapshot.exists()) {
-          const userData = docSnapshot.data();
-          const hospitalUID = userData.hospitalUID;
-          return hospitalUID;
-        } else {
-          console.log("No document found for the current user");
-          return null;
+        // Get the UID of the current user
+        const userUID = currentUser.uid;
+  
+        // Reference to the "personnelMap" document
+        const personnelMapDocRef = doc(db, "personnelMap", "personnelMap");
+  
+        // Get the document snapshot
+        const personnelMapDocSnapshot = await getDoc(personnelMapDocRef);
+  
+        // Check if the document exists
+        if (personnelMapDocSnapshot.exists()) {
+          // Get the data from the document
+          const personnelMapData = personnelMapDocSnapshot.data();
+  
+          // Check if the user's UID exists in the personnelMap
+          if (personnelMapData && personnelMapData[userUID]) {
+            const hospitalUID = personnelMapData[userUID];
+  
+            // Return the hospital UID
+            return hospitalUID;
+          }
         }
+  
+        // Document or user's UID not found
+        console.log("No document or user's UID found");
+        return null;
       } catch (error) {
-          console.error("Error fetching document:", error);
-          return null;
+        console.error("Error fetching document:", error);
+        return null;
       }
     } else {
+      // No user is signed in
       console.log("No user signed in");
       return null;
     }
   };
 
-  const pushPersonellToHospital = async (hospitalUID, personnelData) => {
+  const pushPersonellToHospital = async (hospitalUID, personnelData, userUID) => {
     try {
       const personnelCollectionRef = collection(db, "Hospitals", hospitalUID, "personnel");
-      const docRef = await addDoc(personnelCollectionRef, personnelData);
-      const documentId = docRef.id;
+      await setDoc(doc(personnelCollectionRef, userUID), personnelData);
       console.log("Personnel added to hospital collection successfully.");
-      return documentId; // Return the document ID
+      return userUID; // Return the user UID (document ID)
     } catch (error) {
       console.error("Error adding personnel to hospital collection:", error);
       throw error; // Throw error for handling in handleCreate
     }
   };
+
 
   const [personnelDocID, setPersonnelDocID] = useState(null);
 
@@ -95,23 +140,29 @@ const DoctorOnboarding = () => {
   };
 
   const handleCreate = async () => {
-    try {
-      // Wait for the hospital UID
-      const hospitalUID = await getCurrentUserHospitalUID();
-      console.log("Hospital UID:", hospitalUID);
-      console.log("Form Data:", formData);
-  
-      // Call the function to add personnel to the hospital subcollection
-      const personnelDocID = await pushPersonellToHospital(hospitalUID, formData);
-  
-      // Generate QR code data
-      const qrData = JSON.stringify({ key:"bbldrizzy",hospitalUID: hospitalUID , uid: personnelDocID });
-      setQrCodeData(qrData);
-    } catch (error) {
-      console.error("Error:", error);
-      // Handle error
-    }
-  };
+  try {
+    // Wait for the hospital UID
+    const hospitalUID = await getCurrentUserHospitalUID();
+    console.log("Hospital UID:", hospitalUID);
+    console.log("Form Data:", formData);
+
+    // Create a new Firebase Authentication user
+    const userUID = await createFirebaseUser(formData.email, formData.email);
+
+    // Call the function to add personnel to the hospital subcollection
+    const personnelDocID = await pushPersonellToHospital(hospitalUID, formData, userUID);
+
+    // Generate QR code data
+    const qrData = JSON.stringify({ key: "bbldrizzy", hospitalUID, uid: personnelDocID });
+    setQrCodeData(qrData);
+
+    // Add personnel document ID and hospital ID to the "personnelMap" collection
+    await addToPersonnelMap(personnelDocID, hospitalUID);
+  } catch (error) {
+    console.error("Error:", error);
+    // Handle error
+  }
+};
   
   return (
     <div className="bg-highlight h-full flex flex-col flex-start p-2 gap-2 overflow-scroll">

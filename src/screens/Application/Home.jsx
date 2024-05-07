@@ -2,6 +2,7 @@ import React from "react";
 import { auth , db} from "../../../firebase/firebase";
 import { doc,getDoc } from "firebase/firestore";
 import { useState,useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { emergencies, staff, doctor, appointments, nextShift } from "../../constants";
 
@@ -49,6 +50,8 @@ const getCurrentUserMasterAccountName = async () => {
 
 const Home = () => {
 
+  const navigate = useNavigate();
+
   const [userName, setUserName] = useState(""); // State to store the current user's master account name
 
   useEffect(() => {
@@ -91,7 +94,7 @@ const Home = () => {
       </section>
       <section className="w-full border-2 border-tertiary p-2 flex justify-between items-center rounded-xl  ">
         <h4 className="font-semibold text-xl text-tertiary">Manage Hospital Staff</h4>
-        <button className="bg-tertiary p-3 rounded-lg text-white">
+        <button className="bg-tertiary p-3 rounded-lg text-white" onClick={()=>{navigate('/dashboard/staffDisplay')}}>
           Manage
         </button>
       </section>
