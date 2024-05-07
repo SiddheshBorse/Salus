@@ -10,6 +10,9 @@ import TimePicker from "react-time-picker";
 import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
 
+import { auth,db } from "../../../firebase/firebase";
+import { doc, updateDoc, arrayUnion,getDoc } from "firebase/firestore";
+
 const style = {
   position: "absolute",
   top: "50%",
@@ -32,6 +35,85 @@ const DoctorUI = () => {
   const [startDate, setStartDate] = useState(new Date());
   const [starting, setStarting] = useState("10:00");
   const [ending, setEnding] = useState("10:00");    
+
+  const getCurrentUserHospitalUID = async () => {
+    const currentUser = auth.currentUser;
+  
+    if (currentUser) {
+      try {
+        // Get the UID of the current user
+        const userUID = currentUser.uid;
+  
+        // Reference to the "personnelMap" document
+        const personnelMapDocRef = doc(db, "personnelMap", "personnelMap");
+  
+        // Get the document snapshot
+        const personnelMapDocSnapshot = await getDoc(personnelMapDocRef);
+  
+        // Check if the document exists
+        if (personnelMapDocSnapshot.exists()) {
+          // Get the data from the document
+          const personnelMapData = personnelMapDocSnapshot.data();
+  
+          // Check if the user's UID exists in the personnelMap
+          if (personnelMapData && personnelMapData[userUID]) {
+            const hospitalUID = personnelMapData[userUID];
+  
+            // Return the hospital UID
+            return hospitalUID;
+          }
+        }
+  
+        // Document or user's UID not found
+        console.log("No document or user's UID found");
+        return null;
+      } catch (error) {
+        console.error("Error fetching document:", error);
+        return null;
+      }
+    } else {
+      // No user is signed in
+      console.log("No user signed in");
+      return null;
+    }
+  };
+
+  const updatePersonnelSchedule = async (data) => {
+    try {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const userUID = currentUser.uid;
+        const hospitalUID = await getCurrentUserHospitalUID();
+  
+        if (hospitalUID) {
+          const personnelDocRef = doc(db, "Hospitals", hospitalUID, "personnel", userUID);
+  
+          // Convert data to an array of objects with correct format
+          const scheduleData = data.map((card) => {
+            const { date, startingTime, endingTime } = card;
+            return {
+              date: date.toISOString(),
+              startTime: startingTime,
+              endTime: endingTime,
+            };
+          });
+  
+          // Use the spread operator to pass individual objects to arrayUnion
+          await updateDoc(personnelDocRef, {
+            schedule: arrayUnion(...scheduleData),
+          });
+  
+          console.log("Personnel schedule updated successfully.");
+        } else {
+          console.log("Hospital UID not found.");
+        }
+      } else {
+        console.log("No user signed in.");
+      }
+    } catch (error) {
+      console.error("Error updating personnel schedule:", error);
+    }
+  };
 
   const createCard = () => {
     // Convert starting and ending time strings to Date objects
@@ -57,11 +139,13 @@ const DoctorUI = () => {
         endingTime: ending,
       };
       setData((prevData) => [...prevData, newCard]);
+      updatePersonnelSchedule(data); // Update the personnel schedule in Firestore
       handleClose(); // Close the modal
     } else {
       alert("Time range overlaps with existing appointments. Please select a different time range.");
     }
   };
+
   const isEmpty = data.length === 0;
   return (
     <div>
