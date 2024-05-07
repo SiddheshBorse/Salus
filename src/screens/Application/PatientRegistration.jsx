@@ -13,7 +13,8 @@ const PatientRegistration = () => {
     dob: "",
     gender: "",
     mobile: "",
-    zipcode: ""
+    zipcode: "",
+    medicalHistory: []
   });
 
   const [hospitalUID, setHospitalUID] = useState(null);
