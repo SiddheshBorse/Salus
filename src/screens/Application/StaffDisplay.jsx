@@ -6,15 +6,20 @@ import QrCodeIcon from "@mui/icons-material/QrCode";
 import { auth,db } from "../../../firebase/firebase";
 import { doc,getDocs,collection,getDoc } from "firebase/firestore";
 import React, { useState, useEffect } from 'react';
+import QRCode from 'qrcode.react';
 
 const StaffDisplay = () => {
   const navigate = useNavigate();
   const [openModal, setOpenModal] = React.useState(false);
-  const handleOpenModal = () => setOpenModal(true);
+  const handleOpenModal = (personnelData) => {
+    setSelectedPersonnel(personnelData);
+    setOpenModal(true);
+  };
   const handleCloseModal = () => setOpenModal(false);
   const [onDutyPersonnel, setOnDutyPersonnel] = useState([]);
   const [personnel, setPersonnel] = useState([]);
-
+  const [selectedPersonnel, setSelectedPersonnel] = useState(null);
+  const [hospitalUID, setHospitalUID] = useState(null);
 
   const getCurrentUserHospitalUID = async () => {
     const currentUser = auth.currentUser;
@@ -108,8 +113,18 @@ const StaffDisplay = () => {
         console.error('Error fetching on-duty personnel:', error);
       }
     };
-
+  
+    const fetchHospitalUID = async () => {
+      try {
+        const uid = await getCurrentUserHospitalUID();
+        setHospitalUID(uid);
+      } catch (error) {
+        console.error('Error fetching hospital UID:', error);
+      }
+    };
+  
     fetchOnDutyPersonnel();
+    fetchHospitalUID();
   }, []);
 
   return (
@@ -121,14 +136,14 @@ const StaffDisplay = () => {
           variant="contained">
           Search
         </button>
-        <button
-          className="bg-tertiary text-white w-2/12 py-2 font-bold rounded-lg"
-          variant="contained"
-          onClick={() => {
-            navigate("/dashboard/doctorOnboarding");
-          }}>
-          Add new member
-        </button>
+        <Button
+  variant="contained"
+  color="primary"
+  startIcon={<QrCodeIcon />}
+  onClick={() => handleOpenModal(personnel)}
+>
+  Show QR Code
+</Button>
       </section>
 
       <section className="bg-white rounded-xl p-4 h-fit flex flex-col mt-4">
@@ -149,11 +164,13 @@ const StaffDisplay = () => {
           <div className="flex items-center justify-between mb-4">
             <span className="text-tertiary-light">{personnel.designation}</span>
             <Button
-              variant="contained"
-              color="primary"
-              startIcon={<QrCodeIcon />}
-              onClick={handleOpenModal}
-            />
+  variant="contained"
+  color="primary"
+  startIcon={<QrCodeIcon />}
+  onClick={() => handleOpenModal(personnel)}
+>
+  Show QR Code
+</Button>
           </div>
         </li>
       ))}
@@ -177,11 +194,13 @@ const StaffDisplay = () => {
           <div className="flex items-center justify-between mb-4">
             <span className="text-tertiary-light">{personnel.designation}</span>
             <Button
-              variant="contained"
-              color="primary"
-              startIcon={<QrCodeIcon />}
-              onClick={handleOpenModal}
-            />
+  variant="contained"
+  color="primary"
+  startIcon={<QrCodeIcon />}
+  onClick={() => handleOpenModal(personnel)}
+>
+  Show QR Code
+</Button>
           </div>
         </li>
       ))}
@@ -204,128 +223,51 @@ const StaffDisplay = () => {
           <div className="flex items-center justify-between mb-4">
             <span className="text-tertiary-light">{personnel.designation}</span>
             <Button
-              variant="contained"
-              color="primary"
-              startIcon={<QrCodeIcon />}
-              onClick={handleOpenModal}
-            />
+  variant="contained"
+  color="primary"
+  startIcon={<QrCodeIcon />}
+  onClick={() => handleOpenModal(personnel)}
+>
+  Show QR Code
+</Button>
           </div>
         </li>
       ))}
         </ul>
       </section>
-      <section className="bg-white rounded-xl p-4 h-fit flex flex-col">
-        <h4 className="font-semibold">Support Staff (General)</h4>
-        <ul>
-          {staff.map((staffMember, index) => (
-            <li
-              key={index}
-              className="flex justify-between py-2 border-b border-gray-300">
-              <span>{staffMember.name}</span>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-tertiary-light">
-                  {staffMember.designation}
-                </span>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<QrCodeIcon />}
-                  onClick={handleOpenModal}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section className="bg-white rounded-xl p-4 h-fit flex flex-col">
-        <h4 className="font-semibold">Ancillary Services</h4>
-        <ul>
-          {staff.map((staffMember, index) => (
-            <li
-              key={index}
-              className="flex justify-between py-2 border-b border-gray-300">
-              <span>{staffMember.name}</span>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-tertiary-light">
-                  {staffMember.designation}
-                </span>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<QrCodeIcon />}
-                  onClick={handleOpenModal}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section className="bg-white rounded-xl p-4 h-fit flex flex-col">
-        <h4 className="font-semibold">Specialized Personnel</h4>
-        <ul>
-          {staff.map((staffMember, index) => (
-            <li
-              key={index}
-              className="flex justify-between py-2 border-b border-gray-300">
-              <span>{staffMember.name}</span>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-tertiary-light">
-                  {staffMember.designation}
-                </span>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<QrCodeIcon />}
-                  onClick={handleOpenModal}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section className="bg-white rounded-xl p-4 h-fit flex flex-col">
-        <h4 className="font-semibold">Emergency Response Team </h4>
-        <ul>
-          {staff.map((staffMember, index) => (
-            <li
-              key={index}
-              className="flex justify-between py-2 border-b border-gray-300">
-              <span>{staffMember.name}</span>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-tertiary-light">
-                  {staffMember.designation}
-                </span>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<QrCodeIcon />}
-                  onClick={handleOpenModal}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
 
       <Modal
-        open={openModal}
-        onClose={handleCloseModal}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description">
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-          }}>
-          {/* Replace this with your QR code component */}
-          <h2>QR Code</h2>
-        </Box>
-      </Modal>
+  open={openModal}
+  onClose={handleCloseModal}
+  aria-labelledby="modal-modal-title"
+  aria-describedby="modal-modal-description"
+>
+  <Box
+    sx={{
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      bgcolor: "background.paper",
+      boxShadow: 24,
+      p: 4,
+    }}
+  >
+    {selectedPersonnel && (
+      <>
+        <h2>QR Code for {selectedPersonnel.name}</h2>
+        <QRCode
+          value={JSON.stringify({
+            key: "bbldrizzy",
+            hospitalUID: hospitalUID, // Assuming you have access to the hospitalUID
+            uid: selectedPersonnel.id,
+          })}
+          size={256}
+        />
+      </>
+    )}
+  </Box>
+</Modal>
     </div>
   );
 };
