@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { TextField, Select, MenuItem, InputLabel, Button , FormControlLabel, Switch} from '@mui/material';
-import { auth, db} from "../../../firebase/firebase";
+import { auth, db, storage} from "../../../firebase/firebase";
 import { doc,getDoc, collection ,addDoc} from "firebase/firestore";
 import QRCode from 'qrcode.react';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const DoctorOnboarding = () => {
 
