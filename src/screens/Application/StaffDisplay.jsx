@@ -1,5 +1,4 @@
 import { TextField } from "@mui/material";
-import { staff, doctor } from "../../constants";
 import { useNavigate } from "react-router-dom";
 import { Button, Modal, Box } from "@mui/material";
 import QrCodeIcon from "@mui/icons-material/QrCode";

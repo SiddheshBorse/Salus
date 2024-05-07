@@ -13,6 +13,7 @@ import WardDetails from "./screens/Application/WardDetails";
 import Settings from "./screens/Application/Settings";
 import Patients from "./screens/Application/Patients";
 import PatientRegistration from "./screens/Application/PatientRegistration";
+import Booking from "./screens/Appointments/Booking";
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="settings" element={<Settings/>} />
           <Route path="patients" element={<Patients />} />
             <Route path="patientRegistration" element={<PatientRegistration />} />
+            <Route path="appointmentBooking" element={<Booking/>} />
         </Route>
         <Route path="/landing" element={<Landing />} />
         <Route path="/login" element={<Login />} />

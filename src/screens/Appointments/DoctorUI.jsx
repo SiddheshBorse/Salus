@@ -90,11 +90,18 @@ const DoctorUI = () => {
   
           // Convert data to an array of objects with correct format
           const scheduleData = data.map((card) => {
-            const { date, startingTime, endingTime } = card;
+            const { date, startingTime, endingTime, appointments } = card;
+            // Convert appointments array to Firestore-compatible format
+            const formattedAppointments = appointments.map(appointment => ({
+              assignedTo: appointment.assignedTo,
+              startTime: appointment.startTime,
+              endTime: appointment.endTime
+            }));
             return {
-              date: date.toISOString(),
+              date: date.toISOString().slice(0, 10), // Only keep the date part
               startTime: startingTime,
               endTime: endingTime,
+              appointments: formattedAppointments
             };
           });
   
@@ -115,36 +122,68 @@ const DoctorUI = () => {
     }
   };
 
-  const createCard = () => {
-    // Convert starting and ending time strings to Date objects
-    const startingTime = new Date(`2022-01-01T${starting}`);
-    const endingTime = new Date(`2022-01-01T${ending}`);
-  
-    // Check for overlapping time range
-    const isOverlapping = data.some((card) => {
-      const cardStartingTime = new Date(`2022-01-01T${card.startingTime}`);
-      const cardEndingTime = new Date(`2022-01-01T${card.endingTime}`);
-      return (
-        (startingTime >= cardStartingTime && startingTime <= cardEndingTime) ||
-        (endingTime >= cardStartingTime && endingTime <= cardEndingTime) ||
-        (startingTime <= cardStartingTime && endingTime >= cardEndingTime)
-      );
-    });
-  
-    // If there's no overlapping, add the new card
-    if (!isOverlapping) {
-      const newCard = {
-        date: startDate,
-        startingTime: starting,
-        endingTime: ending,
+const createCard = async () => {
+  // Convert starting and ending time strings to Date objects
+  const startingTime = new Date(`${startDate.toISOString().slice(0, 10)}T${starting}`);
+  const endingTime = new Date(`${startDate.toISOString().slice(0, 10)}T${ending}`);
+
+  // Check for overlapping time range
+  const isOverlapping = data.some((card) => {
+    const cardStartingTime = new Date(`${card.date.toISOString().slice(0, 10)}T${card.startingTime}`);
+    const cardEndingTime = new Date(`${card.date.toISOString().slice(0, 10)}T${card.endingTime}`);
+    return (
+      (startingTime >= cardStartingTime && startingTime <= cardEndingTime) ||
+      (endingTime >= cardStartingTime && endingTime <= cardEndingTime) ||
+      (startingTime <= cardStartingTime && endingTime >= cardEndingTime)
+    );
+  });
+
+  // If there's no overlapping, create appointment slots
+  if (!isOverlapping) {
+    const appointments = [];
+
+    // Iterate over time range in 30-minute intervals
+    let currentTime = new Date(startingTime);
+    while (currentTime < endingTime) {
+      const appointmentStartTime = new Date(currentTime);
+      const appointmentEndTime = new Date(currentTime.getTime() + 30 * 60000); // 30 minutes later
+
+      // Create appointment slot map
+      const appointmentSlot = {
+        assignedTo: "",
+        startTime: appointmentStartTime.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+        endTime: appointmentEndTime.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
       };
-      setData((prevData) => [...prevData, newCard]);
-      updatePersonnelSchedule(data); // Update the personnel schedule in Firestore
-      handleClose(); // Close the modal
-    } else {
-      alert("Time range overlaps with existing appointments. Please select a different time range.");
+
+      // Add appointment slot to array
+      appointments.push(appointmentSlot);
+
+      // Move to next 30-minute interval
+      currentTime = appointmentEndTime;
     }
-  };
+
+    // Create new card with appointments
+    const newCard = {
+      date: startDate,
+      startingTime: starting,
+      endingTime: ending,
+      appointments: appointments,
+    };
+
+    // Add the new card to state
+    setData([...data, newCard]);
+
+    // Update the personnel schedule in Firestore
+    await updatePersonnelSchedule([...data, newCard]);
+
+    // Close the modal
+    handleClose();
+  } else {
+    alert("Time range overlaps with existing appointments. Please select a different time range.");
+  }
+};
+
+
 
   const isEmpty = data.length === 0;
   return (

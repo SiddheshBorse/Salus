@@ -66,7 +66,6 @@ const Home = () => {
   
   return (
     <div className="bg-highlight h-full flex flex-col flex-start p-2 gap-2 overflow-y-auto">
-      <h1 className="font-bold text-2xl">👋 Hello, {userName} </h1>
       <section className="bg-background-2 w-full flex justify-between p-4 rounded-xl">
         <h4 className="text-secondary font-semibold">No Emergency Code</h4>
         <button className="text-error font-semibold">Call Emergency</button>
