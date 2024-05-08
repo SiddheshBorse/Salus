@@ -3,6 +3,7 @@ import { TextField } from "@mui/material";
 import { Button, Modal, Box } from "@mui/material";
 import { auth, db } from "../../../firebase/firebase";
 import { doc, getDocs, collection, getDoc } from "firebase/firestore";
+
 // Patient Card Component
 const PatientCard = ({ patient, onClick }) => {
   return (
@@ -34,7 +35,7 @@ const Patients = () => {
   const [patients, setPatients] = useState([]);
 
   // Function to fetch the hospital UID for the current user
-  const getCurrentUserHospitalUID = async () => {
+  const fetchHospitalUID = async () => {
     // Implementation similar to the one in the StaffDisplay page
     const currentUser = auth.currentUser;
 
@@ -59,7 +60,7 @@ const Patients = () => {
             const hospitalUID = personnelMapData[userUID];
 
             // Return the hospital UID
-            console.log(hospitalUID)
+            console.log(hospitalUID);
             return hospitalUID;
           }
         }
@@ -98,20 +99,35 @@ const Patients = () => {
     }
   };
 
-  // Fetch hospital UID and initialize other data on component mount
+  // Fetch hospital UID and patients data when the component mounts
   useEffect(() => {
-    const fetchHospitalUID = async () => {
+    const fetchData = async () => {
       try {
-        const uid = await getCurrentUserHospitalUID();
+        const uid = await fetchHospitalUID();
         setHospitalUID(uid);
         fetchPatients(); // Fetch patients after getting hospital UID
       } catch (error) {
-        console.error("Error fetching hospital UID:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
-    fetchHospitalUID();
-  }, []);
+    fetchData();
+  }, [fetchHospitalUID]);
+
+  // Function to refetch data when needed (e.g., when navigating back to the page)
+  const refetchData = () => {
+    const fetchData = async () => {
+      try {
+        const uid = await fetchHospitalUID();
+        setHospitalUID(uid);
+        fetchPatients(); // Fetch patients after getting hospital UID
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  };
 
   // Function to handle opening the patient details modal
   const handleOpenModal = (patientData) => {
