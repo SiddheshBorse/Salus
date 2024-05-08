@@ -39,9 +39,8 @@ const Patients = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [patients, setPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [readOperationCount, setReadOperationCount] = useState(0); // State for read operation count
   const navigate = useNavigate();
-
-
 
   useEffect(() => {
     const getCurrentUserHospitalUID = async () => {
@@ -52,6 +51,12 @@ const Patients = () => {
           const userUID = currentUser.uid;
           const personnelMapDocRef = doc(db, "personnelMap", "personnelMap");
           const personnelMapDocSnapshot = await getDoc(personnelMapDocRef);
+          // Increment read operation count outside the useEffect hook
+          setReadOperationCount((prevCount) => {
+            const newCount = prevCount + 1;
+            console.log("Read operation count:", newCount);
+            return newCount;
+          });
 
           if (personnelMapDocSnapshot.exists()) {
             const personnelMapData = personnelMapDocSnapshot.data();
@@ -59,7 +64,6 @@ const Patients = () => {
             if (personnelMapData && personnelMapData[userUID]) {
               const fetchedHospitalUID = personnelMapData[userUID];
               console.log(fetchedHospitalUID);
-              // Update the state with the fetched hospital UID
               setHospitalUID(fetchedHospitalUID);
             } else {
               console.log("No document or user's UID found");
@@ -82,6 +86,12 @@ const Patients = () => {
         try {
           const patientsCollectionRef = collection(db, "Hospitals", hospitalUID, "patients");
           const querySnapshot = await getDocs(patientsCollectionRef);
+          // Increment read operation count outside the useEffect hook
+          setReadOperationCount((prevCount) => {
+            const newCount = prevCount + 1;
+            console.log("Read operation count:", newCount);
+            return newCount;
+          });
           const patientList = [];
           querySnapshot.forEach((doc) => {
             patientList.push(doc.data());
