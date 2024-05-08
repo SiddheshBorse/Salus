@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { TextField, Button } from "@mui/material";
-import { Modal, Box } from "@mui/material";
+import React, { useState, useEffect, useCallback } from "react";
+import { TextField, Button, Modal, Box } from "@mui/material";
 import { auth, db } from "../../../firebase/firebase";
 import { doc, getDocs, collection, getDoc } from "firebase/firestore";
-import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
+import { useNavigate } from "react-router-dom";
 
 // Patient Card Component
 const PatientCard = ({ patient, onClick }) => {
@@ -40,40 +39,23 @@ const Patients = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [patients, setPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate(); // Initialize the useNavigate hook
+  const navigate = useNavigate();
 
-  // Function to fetch the hospital UID for the current user
-  const fetchHospitalUID = async () => {
-    // Implementation similar to the one in the StaffDisplay page
+  const fetchHospitalUID = useCallback(async () => {
     const currentUser = auth.currentUser;
-
     if (currentUser) {
       try {
-        // Get the UID of the current user
         const userUID = currentUser.uid;
-
-        // Reference to the "personnelMap" document
         const personnelMapDocRef = doc(db, "personnelMap", "personnelMap");
-
-        // Get the document snapshot
         const personnelMapDocSnapshot = await getDoc(personnelMapDocRef);
-
-        // Check if the document exists
         if (personnelMapDocSnapshot.exists()) {
-          // Get the data from the document
           const personnelMapData = personnelMapDocSnapshot.data();
-
-          // Check if the user's UID exists in the personnelMap
           if (personnelMapData && personnelMapData[userUID]) {
             const hospitalUID = personnelMapData[userUID];
-
-            // Return the hospital UID
             console.log(hospitalUID);
             return hospitalUID;
           }
         }
-
-        // Document or user's UID not found
         console.log("No document or user's UID found");
         return null;
       } catch (error) {
@@ -81,22 +63,15 @@ const Patients = () => {
         return null;
       }
     } else {
-      // No user is signed in
       console.log("No user signed in");
       return null;
     }
-  };
+  }, []);
 
-  // Function to fetch patients from the database
-  const fetchPatients = async () => {
+  const fetchPatients = useCallback(async () => {
     if (hospitalUID) {
       try {
-        const patientsCollectionRef = collection(
-          db,
-          "Hospitals",
-          hospitalUID,
-          "patients"
-        );
+        const patientsCollectionRef = collection(db, "Hospitals", hospitalUID, "patients");
         const querySnapshot = await getDocs(patientsCollectionRef);
         const patientList = [];
         querySnapshot.forEach((doc) => {
@@ -109,78 +84,66 @@ const Patients = () => {
     } else {
       console.error("Hospital UID is not available");
     }
-  };
+  }, [hospitalUID]);
 
-  // Fetch hospital UID and patients data when the component mounts
   useEffect(() => {
     const fetchData = async () => {
       try {
         const uid = await fetchHospitalUID();
         setHospitalUID(uid);
         if (uid) {
-          fetchPatients(); // Fetch patients after getting hospital UID
+          fetchPatients();
         }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-
     fetchData();
-  }, [fetchHospitalUID]);
+  }, [fetchHospitalUID, fetchPatients]);
 
-  // Function to refetch data when needed (e.g., when navigating back to the page)
-  const refetchData = () => {
+  const refetchData = useCallback(() => {
     const fetchData = async () => {
       try {
         const uid = await fetchHospitalUID();
         setHospitalUID(uid);
         if (uid) {
-          fetchPatients(); // Fetch patients after getting hospital UID
+          fetchPatients();
         }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-
     fetchData();
-  };
+  }, [fetchHospitalUID, fetchPatients]);
 
-  // Function to handle opening the patient details modal
   const handleOpenModal = (patientData) => {
     setSelectedPatient(patientData);
     setOpenModal(true);
   };
 
-  // Function to handle closing the patient details modal
   const handleCloseModal = () => {
     setOpenModal(false);
   };
 
-  // Function to handle selecting a patient card
   const handleSelectPatient = (patient) => {
     setSelectedPatient(patient);
     setOpenModal(true);
   };
 
-  // Function to handle search term change
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
-  // Function to navigate to the patient registration page
   const handleNavigateToPatientRegistration = () => {
     navigate("/dashboard/patientRegistration");
   };
 
-  // Filter patients based on search term
   const filteredPatients = patients.filter((patient) =>
     patient.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Render patient list and other components
   return (
     <div className="bg-highlight h-full flex flex-col flex-start p-2 gap-4 items-center">
-      {/* Search and add patient components */}
       <div className="flex items-center gap-2">
         <TextField
           className="w-1/2"
@@ -196,19 +159,12 @@ const Patients = () => {
           Add Patient
         </Button>
       </div>
-      {/* Patient list components */}
       <div className="reception-scroll-container overflow-y-auto h-full w-full">
         {filteredPatients.map((patient, index) => (
-          <PatientCard
-            key={index}
-            patient={patient}
-            onClick={handleSelectPatient}
-          />
+          <PatientCard key={index} patient={patient} onClick={handleSelectPatient} />
         ))}
       </div>
-      {/* Other sections as needed */}
 
-      {/* Patient Details Modal */}
       <Modal
         open={openModal}
         onClose={handleCloseModal}
@@ -226,11 +182,9 @@ const Patients = () => {
             p: 4,
           }}
         >
-          {/* Display patient details */}
           {selectedPatient && (
             <>
               <h2>{selectedPatient.name}</h2>
-              {/* Display other patient details */}
             </>
           )}
         </Box>
