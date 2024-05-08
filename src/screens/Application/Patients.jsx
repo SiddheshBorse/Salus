@@ -33,6 +33,7 @@ const Patients = () => {
   const [openModal, setOpenModal] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [patients, setPatients] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Function to fetch the hospital UID for the current user
   const fetchHospitalUID = async () => {
@@ -145,53 +146,69 @@ const Patients = () => {
     setSelectedPatient(patient);
     setOpenModal(true);
   };
+  
+    // Function to handle search term change
+    const handleSearchChange = (event) => {
+      setSearchTerm(event.target.value);
+    };
+  
+    // Filter patients based on search term
+    const filteredPatients = patients.filter((patient) =>
+      patient.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   // Render patient list and other components
-  return (
-    <div className="bg-highlight h-full flex flex-col flex-start p-2 gap-2 items-center">
-      {/* Search and add patient components */}
-      <TextField className="w-4/12" label="Search Patient" />
-      {/* Patient list components */}
-      <div className="reception-scroll-container overflow-y-auto h-full w-full">
-        {patients.map((patient, index) => (
-          <PatientCard
-            key={index}
-            patient={patient}
-            onClick={handleSelectPatient}
-          />
-        ))}
-      </div>
-      {/* Other sections as needed */}
-
-      {/* Patient Details Modal */}
-      <Modal
-        open={openModal}
-        onClose={handleCloseModal}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-          }}
+    // Render patient list and other components
+    return (
+      <div className="bg-highlight h-full flex flex-col flex-start p-2 gap-2 items-center">
+        {/* Search and add patient components */}
+        <TextField
+          className="w-4/12"
+          label="Search Patient"
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+        {/* Patient list components */}
+        <div className="reception-scroll-container overflow-y-auto h-full w-full">
+          {filteredPatients.map((patient, index) => (
+            <PatientCard
+              key={index}
+              patient={patient}
+              onClick={handleSelectPatient}
+            />
+          ))}
+        </div>
+        {/* Other sections as needed */}
+  
+        {/* Patient Details Modal */}
+        <Modal
+          open={openModal}
+          onClose={handleCloseModal}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
         >
-          {/* Display patient details */}
-          {selectedPatient && (
-            <>
-              <h2>{selectedPatient.name}</h2>
-              {/* Display other patient details */}
-            </>
-          )}
-        </Box>
-      </Modal>
-    </div>
-  );
-};
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            {/* Display patient details */}
+            {selectedPatient && (
+              <>
+                <h2>{selectedPatient.name}</h2>
+                {/* Display other patient details */}
+              </>
+            )}
+          </Box>
+        </Modal>
+      </div>
+    );
+  };
 
 export default Patients;
