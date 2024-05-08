@@ -41,80 +41,63 @@ const Patients = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
-  const fetchHospitalUID = useCallback(async () => {
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-      try {
-        const userUID = currentUser.uid;
-        const personnelMapDocRef = doc(db, "personnelMap", "personnelMap");
-        const personnelMapDocSnapshot = await getDoc(personnelMapDocRef);
-        if (personnelMapDocSnapshot.exists()) {
-          const personnelMapData = personnelMapDocSnapshot.data();
-          if (personnelMapData && personnelMapData[userUID]) {
-            const hospitalUID = personnelMapData[userUID];
-            console.log(hospitalUID);
-            return hospitalUID;
-          }
-        }
-        console.log("No document or user's UID found");
-        return null;
-      } catch (error) {
-        console.error("Error fetching document:", error);
-        return null;
-      }
-    } else {
-      console.log("No user signed in");
-      return null;
-    }
-  }, []);
 
-  const fetchPatients = useCallback(async () => {
-    if (hospitalUID) {
-      try {
-        const patientsCollectionRef = collection(db, "Hospitals", hospitalUID, "patients");
-        const querySnapshot = await getDocs(patientsCollectionRef);
-        const patientList = [];
-        querySnapshot.forEach((doc) => {
-          patientList.push(doc.data());
-        });
-        setPatients(patientList);
-      } catch (error) {
-        console.error("Error fetching patients:", error);
-      }
-    } else {
-      console.error("Hospital UID is not available");
-    }
-  }, [hospitalUID]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const uid = await fetchHospitalUID();
-        setHospitalUID(uid);
-        if (uid) {
-          fetchPatients();
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData();
-  }, [fetchHospitalUID, fetchPatients]);
+    const getCurrentUserHospitalUID = async () => {
+      const currentUser = auth.currentUser;
 
-  const refetchData = useCallback(() => {
-    const fetchData = async () => {
-      try {
-        const uid = await fetchHospitalUID();
-        setHospitalUID(uid);
-        if (uid) {
-          fetchPatients();
+      if (currentUser) {
+        try {
+          const userUID = currentUser.uid;
+          const personnelMapDocRef = doc(db, "personnelMap", "personnelMap");
+          const personnelMapDocSnapshot = await getDoc(personnelMapDocRef);
+
+          if (personnelMapDocSnapshot.exists()) {
+            const personnelMapData = personnelMapDocSnapshot.data();
+
+            if (personnelMapData && personnelMapData[userUID]) {
+              const fetchedHospitalUID = personnelMapData[userUID];
+              console.log(fetchedHospitalUID);
+              // Update the state with the fetched hospital UID
+              setHospitalUID(fetchedHospitalUID);
+            } else {
+              console.log("No document or user's UID found");
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching document:", error);
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
+      } else {
+        console.log("No user signed in");
       }
     };
-    fetchData();
-  }, [fetchHospitalUID, fetchPatients]);
+
+    getCurrentUserHospitalUID();
+  }, []);
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      if (hospitalUID) {
+        try {
+          const patientsCollectionRef = collection(db, "Hospitals", hospitalUID, "patients");
+          const querySnapshot = await getDocs(patientsCollectionRef);
+          const patientList = [];
+          querySnapshot.forEach((doc) => {
+            patientList.push(doc.data());
+          });
+          setPatients(patientList);
+        } catch (error) {
+          console.error("Error fetching patients:", error);
+        }
+      } else {
+        console.error("Hospital UID is not available");
+      }
+    };
+
+    fetchPatients();
+  }, [hospitalUID]);
+
 
   const handleOpenModal = (patientData) => {
     setSelectedPatient(patientData);
