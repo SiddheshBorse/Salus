@@ -13,6 +13,11 @@ const PatientCard = ({ patient, onClick }) => {
       onClick={() => onClick(patient)}
     >
       <h4 className="font-semibold text-xl">{patient.name}</h4>
+      <section className="flex flex-row gap-4">
+        <p>Mobile : {patient.mobile}</p>
+        <p>Date of Birth: {patient.dob}</p>
+        <p>Gender: {patient.gender}</p>
+      </section>
       <section className="flex justify-between w-full items-center">
         <span>Status:</span>
         <span>{patient.status}</span>
