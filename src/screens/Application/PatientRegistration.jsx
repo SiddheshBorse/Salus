@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { TextField, Button, Snackbar } from '@mui/material';
 import { auth, db } from "../../../firebase/firebase";
-import { collection, addDoc, doc, getDoc } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc,setDoc } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const PatientRegistration = () => {
   const [formData, setFormData] = useState({
@@ -24,6 +25,26 @@ const PatientRegistration = () => {
   useEffect(() => {
     getCurrentUserHospitalUID();
   }, []);
+
+  const addToPatientMap = async (patientDocID, hospitalUID) => {
+    try {
+      const patientMapDocRef = doc(db, "patientMap", "patientMap");
+      const patientMapData = await getDoc(patientMapDocRef);
+      let patientMap = {};
+  
+      if (patientMapData.exists()) {
+        patientMap = patientMapData.data();
+      }
+  
+      patientMap[patientDocID] = hospitalUID;
+  
+      await setDoc(patientMapDocRef, patientMap);
+      console.log("Patient map updated successfully.");
+    } catch (error) {
+      console.error("Error updating patient map:", error);
+      throw error;
+    }
+  };
 
   const getCurrentUserHospitalUID = async () => {
     const currentUser = auth.currentUser;
@@ -77,10 +98,26 @@ const PatientRegistration = () => {
 
   const handleCreate = async () => {
     try {
-      const patientsCollectionRef = collection(db, "Hospitals", hospitalUID, "patients");
-      await addDoc(patientsCollectionRef, formData);
-      console.log("Patient added successfully.");
-      setSuccessMessageOpen(true);
+      const hospitalUID = await getCurrentUserHospitalUID();
+  
+      if (hospitalUID) {
+        // Sign up the user with Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.email);
+        const user = userCredential.user;
+        const userUID = user.uid;
+  
+        const patientsCollectionRef = collection(db, "Hospitals", hospitalUID, "patients");
+        const patientDocRef = await addDoc(patientsCollectionRef, formData);
+        const patientDocID = patientDocRef.id;
+        console.log("Patient added successfully.");
+  
+        // Add patient document ID and hospital ID to the "patientMap" collection
+        await addToPatientMap(patientDocID, hospitalUID);
+  
+        setSuccessMessageOpen(true);
+      } else {
+        console.error("Hospital UID not found. Cannot register patient.");
+      }
     } catch (error) {
       console.error("Error adding patient:", error);
     }
