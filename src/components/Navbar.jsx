@@ -157,6 +157,12 @@ const Navbar = () => {
           >
             <NavLink to="/dashboard/appointmentBooking">Appointments</NavLink>
           </li>
+          <li
+            className={`${tabClass("Billing")} ${inactiveTabClass}`}
+            onClick={() => handleTabClick("Billing")}
+          >
+            <NavLink to="/dashboard/billingPage">Billing</NavLink>
+          </li>
         </ul>
       </div>
     </div>

@@ -4,12 +4,59 @@ import { auth, db } from "../../../firebase/firebase";
 import { doc, getDocs, collection, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
+const getCurrentUserHospitalUID = async () => {
+  const currentUser = auth.currentUser;
+
+  if (currentUser) {
+    try {
+      // Get the UID of the current user
+      const userUID = currentUser.uid;
+
+      // Reference to the "personnelMap" document
+      const personnelMapDocRef = doc(db, "personnelMap", "personnelMap");
+
+      // Get the document snapshot
+      const personnelMapDocSnapshot = await getDoc(personnelMapDocRef);
+
+      // Check if the document exists
+      if (personnelMapDocSnapshot.exists()) {
+        // Get the data from the document
+        const personnelMapData = personnelMapDocSnapshot.data();
+
+        // Check if the user's UID exists in the personnelMap
+        if (personnelMapData && personnelMapData[userUID]) {
+          const hospitalUID = personnelMapData[userUID];
+
+          // Return the hospital UID
+          return hospitalUID;
+        }
+      }
+
+      // Document or user's UID not found
+      console.log("No document or user's UID found");
+      return null;
+    } catch (error) {
+      console.error("Error fetching document:", error);
+      return null;
+    }
+  } else {
+    // No user is signed in
+    console.log("No user signed in");
+    return null;
+  }
+};
+
 // Patient Card Component
-const PatientCard = ({ patient, onClick }) => {
+const PatientCard = ({ patient, onClick, navigate }) => {
+  const handleNavigateToMedicalRecords = async () => {
+    // Navigate to the Medical Records page and pass patient data via state
+    const hospitalUID = await getCurrentUserHospitalUID();
+    navigate(`/dashboard/medicalRecords?patientId=${patient.id}&hospitalId=${hospitalUID}`);
+  };
+
   return (
     <section
       className="bg-white rounded-xl p-4 flex flex-col w-full gap-4 my-2"
-      onClick={() => onClick(patient)}
     >
       <h4 className="font-semibold text-xl">{patient.name}</h4>
       <section className="flex flex-row gap-4">
@@ -17,6 +64,12 @@ const PatientCard = ({ patient, onClick }) => {
         <p>Date of Birth: {patient.dob}</p>
         <p>Gender: {patient.gender}</p>
       </section>
+      <button
+        className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2"
+        onClick={handleNavigateToMedicalRecords}
+      >
+        Add Medical Records
+      </button>
     </section>
   );
 };
@@ -26,48 +79,6 @@ const Patients = () => {
   const [patients, setPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
-
-  const getCurrentUserHospitalUID = async () => {
-    const currentUser = auth.currentUser;
-  
-    if (currentUser) {
-      try {
-        // Get the UID of the current user
-        const userUID = currentUser.uid;
-  
-        // Reference to the "personnelMap" document
-        const personnelMapDocRef = doc(db, "personnelMap", "personnelMap");
-  
-        // Get the document snapshot
-        const personnelMapDocSnapshot = await getDoc(personnelMapDocRef);
-  
-        // Check if the document exists
-        if (personnelMapDocSnapshot.exists()) {
-          // Get the data from the document
-          const personnelMapData = personnelMapDocSnapshot.data();
-  
-          // Check if the user's UID exists in the personnelMap
-          if (personnelMapData && personnelMapData[userUID]) {
-            const hospitalUID = personnelMapData[userUID];
-  
-            // Return the hospital UID
-            return hospitalUID;
-          }
-        }
-  
-        // Document or user's UID not found
-        console.log("No document or user's UID found");
-        return null;
-      } catch (error) {
-        console.error("Error fetching document:", error);
-        return null;
-      }
-    } else {
-      // No user is signed in
-      console.log("No user signed in");
-      return null;
-    }
-  };
 
   const getAllPersonnel = async () => {
     const patientsArray = [];
@@ -148,7 +159,7 @@ const Patients = () => {
       </div>
       <div className="reception-scroll-container overflow-y-auto h-full w-full">
         {filteredPatients.map((patient, index) => (
-          <PatientCard key={index} patient={patient}/>
+          <PatientCard key={index} patient={patient} navigate={navigate}/>
         ))}
       </div>
     </div>

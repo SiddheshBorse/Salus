@@ -14,6 +14,9 @@ import Settings from "./screens/Application/Settings";
 import Patients from "./screens/Application/Patients";
 import PatientRegistration from "./screens/Application/PatientRegistration";
 import Booking from "./screens/Appointments/Booking";
+import MedicalRecords from "./screens/Application/MedicalRecords";
+import BillingPage from "./screens/Application/BillingPage";
+import Billing from "./screens/Application/Billing";
 
 export default function App() {
   return (
@@ -27,10 +30,13 @@ export default function App() {
           <Route path="reception" element={<Reception />} />
           <Route path="wardsDisplay" element={<WardsAndBeds />} />
           <Route path="wardsDetails" element={<WardDetails />} />
-          <Route path="settings" element={<Settings/>} />
+          <Route path="settings" element={<Settings />} />
           <Route path="patients" element={<Patients />} />
-            <Route path="patientRegistration" element={<PatientRegistration />} />
-            <Route path="appointmentBooking" element={<Booking/>} />
+          <Route path="patientRegistration" element={<PatientRegistration />} />
+          <Route path="appointmentBooking" element={<Booking />} />
+          <Route path="medicalRecords" element={<MedicalRecords />} />
+          <Route path="billingPage" element={<BillingPage />} />
+          <Route path="billing" element={<Billing/>}/>
         </Route>
         <Route path="/landing" element={<Landing />} />
         <Route path="/login" element={<Login />} />
