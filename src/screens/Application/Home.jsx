@@ -1,6 +1,6 @@
 import React from "react";
 import { auth , db} from "../../../firebase/firebase";
-import { doc,getDoc, updateDoc } from "firebase/firestore";
+import { doc,getDocs,collection,getDoc } from "firebase/firestore";
 import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { emergencies, staff, doctor, appointments, nextShift } from "../../constants";
@@ -58,6 +58,8 @@ const Home = () => {
 
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
+  const [onDutyDoctors, setOnDutyDoctors] = useState([]);
+  const [onDutyStaff, setOnDutyStaff] = useState([]);
 
   const getCurrentUserHospitalUID = async () => {
     // Implementation similar to the one in the StaffDisplay page
@@ -103,6 +105,58 @@ const Home = () => {
     }
   };
 
+  const getAllPersonnel = async () => {
+    const personnelArray = [];
+  
+    try {
+      const hospitalUID = await getCurrentUserHospitalUID();
+  
+      if (hospitalUID) {
+        const hospitalDocRef = doc(db, "Hospitals", hospitalUID);
+        const personnelCollectionRef = collection(hospitalDocRef, "personnel");
+  
+        const querySnapshot = await getDocs(personnelCollectionRef);
+  
+        querySnapshot.forEach((doc) => {
+          const personnelData = doc.data();
+          const personnelObject = {
+            id: doc.id,
+            ...personnelData,
+          };
+          personnelArray.push(personnelObject);
+        });
+        console.log(personnelArray);
+        return personnelArray;
+      } else {
+        console.log("No hospital UID found for the current user");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching personnel:", error);
+      return null;
+    }
+  };
+
+  const getOnDutyPersonnel = (personnelArray) => {
+    const onDutyPersonnel = [];
+  
+    if (personnelArray !== null && personnelArray.length > 0) {
+      personnelArray.forEach((personnel) => {
+        const { clock, ...otherPersonnelData } = personnel;
+  
+        if (clock && clock.length > 0) {
+          const lastClockEntry = clock[clock.length - 1];
+  
+          if (lastClockEntry.clockout === null) {
+            onDutyPersonnel.push({ ...otherPersonnelData, isOnDuty: true });
+          }
+        }
+      });
+    }
+  
+    return onDutyPersonnel;
+  };
+
   const handleRemoveEmergency = async (index) => {
     const currentHospitalUID = await getCurrentUserHospitalUID();
   
@@ -141,16 +195,27 @@ const Home = () => {
           setUserName(name);
         }
       });
-
+  
       const currentHospitalUID = await getCurrentUserHospitalUID();
       if (currentHospitalUID) {
         const hospitalDocRef = doc(db, "Hospitals", currentHospitalUID);
         const hospitalDocSnapshot = await getDoc(hospitalDocRef);
-
+  
         if (hospitalDocSnapshot.exists()) {
           const hospitalData = hospitalDocSnapshot.data();
           const emergencyArray = hospitalData.emergencies || [];
           setHospitalEmergencies(emergencyArray);
+  
+          // Fetch on-duty personnel
+          const allPersonnel = await getAllPersonnel();
+          const onDutyPersonnel = getOnDutyPersonnel(allPersonnel);
+  
+          // Filter on-duty doctors and staff
+          const onDutyDoctors = onDutyPersonnel.filter(personnel => personnel.department === "Doctor");
+          const onDutyStaff = onDutyPersonnel.filter(personnel => personnel.department !== "Doctor");
+  
+          setOnDutyDoctors(onDutyDoctors);
+          setOnDutyStaff(onDutyStaff);
         } else {
           console.log("Hospital document does not exist!");
         }
@@ -158,7 +223,7 @@ const Home = () => {
         console.log("Unable to retrieve current hospital UID.");
       }
     };
-
+  
     fetchData();
   }, []);
 
@@ -199,74 +264,29 @@ const Home = () => {
         </button>
       </section>
       <section className="flex w-full justify-between gap-4 items-start">
-        <section className="bg-white rounded-xl p-4 h-fit flex flex-col w-6/12">
-          <h4 className="font-semibold">Active Doctors</h4>
-          <ul>
-            {doctor.map((doctorMember, index) => (
-              <li
-                key={index}
-                className="flex justify-between py-2 border-b border-gray-300"
-              >
-                <span>{doctorMember.name}</span>
-                <span className="text-tertiary-light">
-                  {doctorMember.designation}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-        <section className="bg-white rounded-xl p-4 h-fit flex flex-col w-6/12">
-          <h4 className="font-semibold">Active Staff</h4>
-          <ul>
-            {staff.map((staffMember, index) => (
-              <li
-                key={index}
-                className="flex justify-between py-2 border-b border-gray-300"
-              >
-                <span>{staffMember.name}</span>
-                <span className="text-tertiary-light">
-                  {staffMember.designation}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
+      <section className="bg-white rounded-xl p-4 h-fit flex flex-col w-6/12">
+  <h4 className="font-semibold">Active Doctors</h4>
+  <ul>
+    {onDutyDoctors.map((doctor, index) => (
+      <li key={index} className="flex justify-between py-2 border-b border-gray-300">
+        <span>{doctor.name}</span>
+        <span className="text-tertiary-light">{doctor.designation}</span>
+      </li>
+    ))}
+  </ul>
+</section>
+<section className="bg-white rounded-xl p-4 h-fit flex flex-col w-6/12">
+  <h4 className="font-semibold">Active Staff</h4>
+  <ul>
+    {onDutyStaff.map((staff, index) => (
+      <li key={index} className="flex justify-between py-2 border-b border-gray-300">
+        <span>{staff.name}</span>
+        <span className="text-tertiary-light">{staff.designation}</span>
+      </li>
+    ))}
+  </ul>
+</section>
       </section>
-      <section className="bg-white rounded-xl p-4 h-fit flex flex-col w-full">
-          <h4 className="font-semibold">Appointments</h4>
-          <ul>
-            {appointments.map((appointment, index) => (
-              <li
-                key={index}
-                className="flex justify-between py-2 border-b border-gray-300"
-              >
-                <span>{appointment.name}</span>
-                <span className="text-tertiary-light">
-                  {appointment.doctor}
-                </span>
-                <span className="text-tertiary-light">
-                  {appointment.ailment}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-        <section className="bg-white rounded-xl p-4 h-fit flex flex-col w-full">
-          <h4 className="font-semibold">Next Shift</h4>
-          <ul>
-            {nextShift.map((staffMemeber, index) => (
-              <li
-                key={index}
-                className="flex justify-between py-2 border-b border-gray-300"
-              >
-                <span>{staffMemeber.name}</span>
-                <span className="text-tertiary-light">
-                  {staffMemeber.designation}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
         <EmergencyModal showModal={showModal} handleCloseModal={handleCloseModal} />
     </div>
   );
